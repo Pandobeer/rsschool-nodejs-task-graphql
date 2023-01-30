@@ -187,10 +187,9 @@ export const unsubscribeUser = async (fastify: FastifyInstance, id: string, user
         throw fastify.httpErrors.badRequest("User does not exist");
     }
 
-    const unsubscribedToUserIds = userToUnsubscribeFrom.subscribedToUserIds.filter((subscribedId) => subscribedId !== id);
-    const updatedUserToUnsubscribeFrom = { ...userToUnsubscribeFrom, unsubscribedToUserIds };
+    const subscribedToUserIds = userToUnsubscribeFrom.subscribedToUserIds.filter((subscribedId) => subscribedId !== id);
 
-    const updatedUser = await fastify.db.users.change(userId, updatedUserToUnsubscribeFrom);
+    const updatedUser = await fastify.db.users.change(userId, { subscribedToUserIds });
 
     return updatedUser;
 };
