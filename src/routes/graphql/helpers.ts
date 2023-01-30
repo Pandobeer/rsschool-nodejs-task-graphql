@@ -152,9 +152,10 @@ export const getSubscribedToUser = async (
 ) => {
     const subscribedToUser = await Promise.all(
         subscribedToUserIds.map(async (userId) =>
-            fastify.db.users.findOne({ key: "id", equals: userId })
+            await fastify.db.users.findOne({ key: "id", equals: userId })
         )
     );
+    console.log(subscribedToUser);
 
     return subscribedToUser;
 };

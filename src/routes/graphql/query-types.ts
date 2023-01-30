@@ -27,13 +27,13 @@ export const GraphQLUserType: GraphQLObjectType = new GraphQLObjectType({
         userSubscribedTo: {
             type: new GraphQLList(GraphQLUserType),
             resolve: async (userSubscribedToData: UserEntity, _, fastify: FastifyInstance) => {
-                await getUserSubscribedTo(fastify, userSubscribedToData.id);
+                return await getUserSubscribedTo(fastify, userSubscribedToData.id);
             }
         },
         subscribedToUser: {
             type: new GraphQLList(GraphQLUserType),
             resolve: async (subscribedToUserData: UserEntity, _, fastify: FastifyInstance) => {
-                await getSubscribedToUser(fastify, subscribedToUserData.subscribedToUserIds);
+                return await getSubscribedToUser(fastify, subscribedToUserData.subscribedToUserIds);
             }
         }
     }),
