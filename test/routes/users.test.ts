@@ -2,11 +2,11 @@ import { test } from 'tap';
 import { build } from '../helper';
 import {
   createUser,
-  // createPost,
-  // createProfile,
+  createPost,
+  createProfile,
   getUser,
-  // getProfile,
-  // getPost,
+  getProfile,
+  getPost,
 } from '../utils/requests';
 
 test('users', async (t) => {
@@ -165,47 +165,47 @@ test('users', async (t) => {
     );
   });
 
-  // await t.test('DELETE /users/:id => failure; fake params.id', async (t) => {
-  //   const responseDeleteUser = await app.inject({
-  //     url: `/users/fakeId`,
-  //     method: 'DELETE',
-  //   });
+  await t.test('DELETE /users/:id => failure; fake params.id', async (t) => {
+    const responseDeleteUser = await app.inject({
+      url: `/users/fakeId`,
+      method: 'DELETE',
+    });
 
-  //   t.ok(responseDeleteUser.statusCode === 400);
-  // });
+    t.ok(responseDeleteUser.statusCode === 400);
+  });
 
-  // await t.test(
-  //   'DELETE /users/:id => success; user with relations',
-  //   async (t) => {
-  //     const { body: user1 } = await createUser(app);
-  //     const { body: user2 } = await createUser(app);
-  //     const { body: post1 } = await createPost(app, user1.id);
-  //     const { body: profile1 } = await createProfile(app, user1.id, 'basic');
+  await t.test(
+    'DELETE /users/:id => success; user with relations',
+    async (t) => {
+      const { body: user1 } = await createUser(app);
+      const { body: user2 } = await createUser(app);
+      const { body: post1 } = await createPost(app, user1.id);
+      const { body: profile1 } = await createProfile(app, user1.id, 'basic');
 
-  //     await app.inject({
-  //       url: `/users/${user1.id}/subscribeTo`,
-  //       method: 'POST',
-  //       payload: {
-  //         userId: user2.id,
-  //       },
-  //     });
+      await app.inject({
+        url: `/users/${user1.id}/subscribeTo`,
+        method: 'POST',
+        payload: {
+          userId: user2.id,
+        },
+      });
 
-  //     await app.inject({
-  //       url: `/users/${user1.id}`,
-  //       method: 'DELETE',
-  //     });
+      await app.inject({
+        url: `/users/${user1.id}`,
+        method: 'DELETE',
+      });
 
-  //     const { res: resReceivedUser1 } = await getUser(app, user1.id);
-  //     t.ok(resReceivedUser1.statusCode === 404);
+      const { res: resReceivedUser1 } = await getUser(app, user1.id);
+      t.ok(resReceivedUser1.statusCode === 404);
 
-  //     const { body: receivedUser2 } = await getUser(app, user2.id);
-  //     t.ok(!receivedUser2.subscribedToUserIds.includes(user1.id));
+      const { body: receivedUser2 } = await getUser(app, user2.id);
+      t.ok(!receivedUser2.subscribedToUserIds.includes(user1.id));
 
-  //     const { res: resReceivedProfile1 } = await getProfile(app, profile1.id);
-  //     t.ok(resReceivedProfile1.statusCode === 404);
+      const { res: resReceivedProfile1 } = await getProfile(app, profile1.id);
+      t.ok(resReceivedProfile1.statusCode === 404);
 
-  //     const { res: resReceivedPost1 } = await getPost(app, post1.id);
-  //     t.ok(resReceivedPost1.statusCode === 404);
-  //   }
-  // );
+      const { res: resReceivedPost1 } = await getPost(app, post1.id);
+      t.ok(resReceivedPost1.statusCode === 404);
+    }
+  );
 });

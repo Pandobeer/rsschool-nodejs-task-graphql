@@ -57,15 +57,48 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
       },
     },
     async function (request, reply): Promise<UserEntity> {
-      // const userId = request.params.id;
-
-      // const userToDelete = await fastify.db.users.findOne({ key: "id", equals: userId });
+      const userId = request.params.id;
 
 
-      // if (!userToDelete) {
-      //   throw reply.badRequest("User does not exist");
-      // }
-      return reply.send();
+      const userToDelete = await fastify.db.users.findOne({ key: "id", equals: userId });
+
+      if (!userToDelete) {
+        throw reply.badRequest("User does not exist");
+      }
+
+      await fastify.db.users.delete(userId);
+
+      const userSubs = await fastify.db.users.findMany({ key: "subscribedToUserIds", inArray: userId });
+
+      await Promise.all(
+        userSubs.map(async (user) => {
+          const updatedUser = {
+            ...user, subscribedToUserIds: user.subscribedToUserIds.filter((id) => {
+              id !== userId;
+            })
+          };
+          await fastify.db.users.change(user.id, updatedUser);
+        })
+      );
+
+
+      const userProfile = await fastify.db.profiles.findOne({ key: "userId", equals: userId });
+      if (!userProfile) {
+        throw reply.badRequest("Profile does not exist");
+      }
+      await fastify.db.profiles.delete(userProfile.id);
+
+      const postsOfDeletedUser = await fastify.db.posts.findMany({ key: "userId", equals: userId });
+
+      if (!postsOfDeletedUser) {
+        throw reply.badRequest("No posts were found");
+      }
+
+      for (const post of postsOfDeletedUser) {
+        await fastify.db.posts.delete(post.id);
+      }
+
+      return reply.code(404).send({ message: "User was not found" });
     }
   );
 
