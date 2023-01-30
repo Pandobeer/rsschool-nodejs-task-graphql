@@ -14,7 +14,6 @@ test('users', async (t) => {
 
   await t.test('GET /users/:id => failure; fake params.id', async (t) => {
     const { res: resReceivedUser } = await getUser(app, 'fakeId');
-    console.log(resReceivedUser.statusCode);
 
     t.ok(resReceivedUser.statusCode === 404);
   });
@@ -74,10 +73,9 @@ test('users', async (t) => {
     });
 
     const { body: receivedUser3 } = await getUser(app, user3.id);
-
     t.ok(
       receivedUser3.subscribedToUserIds.includes(user1.id) &&
-      receivedUser3.subscribedToUserIds.includes(user2.id)
+        receivedUser3.subscribedToUserIds.includes(user2.id)
     );
   });
 
@@ -161,7 +159,7 @@ test('users', async (t) => {
     const { body: receivedUser3 } = await getUser(app, user3.id);
     t.ok(
       receivedUser3.subscribedToUserIds.includes(user2.id) &&
-      !receivedUser3.subscribedToUserIds.includes(user1.id)
+        !receivedUser3.subscribedToUserIds.includes(user1.id)
     );
   });
 
