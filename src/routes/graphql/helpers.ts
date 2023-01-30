@@ -1,4 +1,5 @@
 import { FastifyInstance } from "fastify";
+import { CreatePostDTO } from "../../utils/DB/entities/DBPosts";
 import { CreateProfileDTO } from "../../utils/DB/entities/DBProfiles";
 import { CreateUserDTO } from "../../utils/DB/entities/DBUsers";
 
@@ -43,18 +44,12 @@ export const getMemberTypeById = async (fastify: FastifyInstance, memberTypeId: 
     return memberType;
 };
 
-// export type User = {
-//     firstName: string;
-//     lastName: string;
-//     email: string;
-// };
-
-export const createUserInput = async (fastify: FastifyInstance, user: CreateUserDTO): Promise<CreateUserDTO> => {
+export const createUser = async (fastify: FastifyInstance, user: CreateUserDTO): Promise<CreateUserDTO> => {
     const createdUser = await fastify.db.users.create(user);
     return createdUser;
 };
 
-export const createProfileInput = async (fastify: FastifyInstance, profileToCreate: CreateProfileDTO): Promise<CreateProfileDTO> => {
+export const createProfile = async (fastify: FastifyInstance, profileToCreate: CreateProfileDTO): Promise<CreateProfileDTO> => {
     const userId = profileToCreate.userId;
 
     const user = await fastify.db.users.findOne({ key: "id", equals: userId });
@@ -80,7 +75,22 @@ export const createProfileInput = async (fastify: FastifyInstance, profileToCrea
     const createdProfile = await fastify.db.profiles.create(profileToCreate);
 
     return createdProfile;
-
 };
+
+export const createPost = async (fastify: FastifyInstance, post: CreatePostDTO): Promise<CreatePostDTO> => {
+    const userId = post.userId;
+
+    const user = await fastify.db.users.findOne({ key: "id", equals: userId });
+
+    if (!user) {
+        throw fastify.httpErrors.notFound("User does not exist");
+    }
+
+    const createdPost = await fastify.db.posts.create(post);
+
+    return createdPost;
+};
+
+
 
 

@@ -3,8 +3,8 @@ import { graphql, GraphQLList, GraphQLNonNull, GraphQLObjectType, GraphQLSchema 
 import { graphqlBodySchema } from './schema';
 import { GraphQLMemberTypesType, GraphQLPostType, GraphQLProfileType, GraphQLUserType } from './query-types';
 import { GraphQLID } from 'graphql/type';
-import { getMemberTypeById, getPostById, getUserById, createUserInput } from './helpers';
-import { CreateGraphQLProfileInput, CreateGraphQLUserInput } from './mutation-types';
+import { getMemberTypeById, getPostById, getUserById, createProfile, createUser, createPost } from './helpers';
+import { CreateGraphQLProfileInput, CreateGraphQLUserInput, CreateGraphQLPostInput } from './mutation-types';
 
 const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
   fastify
@@ -106,7 +106,7 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
               resolve(_, args) {
                 const { data } = args;
 
-                return createUserInput(fastify, data);
+                return createUser(fastify, data);
               },
             },
 
@@ -116,7 +116,17 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
               resolve(_, args) {
                 const { data } = args;
 
-                return createUserInput(fastify, data);
+                return createProfile(fastify, data);
+              },
+            },
+
+            createPost: {
+              type: GraphQLPostType,
+              args: { data: { type: CreateGraphQLPostInput } },
+              resolve(_, args) {
+                const { data } = args;
+
+                return createPost(fastify, data);
               },
             },
 
