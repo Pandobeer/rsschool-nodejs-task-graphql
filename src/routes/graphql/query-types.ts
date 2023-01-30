@@ -2,9 +2,9 @@ import { GraphQLList, GraphQLObjectType, GraphQLString } from 'graphql';
 import { GraphQLID, GraphQLInt } from 'graphql/type';
 import { FastifyInstance } from 'fastify';
 import { UserEntity } from '../../utils/DB/entities/DBUsers';
-import { getMemberTypeById, getPostById, getProfileById } from './helpers';
+import { getMemberTypeById, getPostById, getProfileById, getUserSubscribedTo, getSubscribedToUser } from './helpers';
 
-export const GraphQLUserType = new GraphQLObjectType({
+export const GraphQLUserType: GraphQLObjectType = new GraphQLObjectType({
     name: "UserType",
     fields: () => ({
         id: { type: GraphQLID },
@@ -24,6 +24,18 @@ export const GraphQLUserType = new GraphQLObjectType({
             type: GraphQLMemberTypesType,
             resolve: async (memberTypeData: UserEntity, _, fastify: FastifyInstance) => getMemberTypeById(fastify, memberTypeData.id),
         },
+        userSubscribedTo: {
+            type: new GraphQLList(GraphQLUserType),
+            resolve: async (userSubscribedToData: UserEntity, _, fastify: FastifyInstance) => {
+                await getUserSubscribedTo(fastify, userSubscribedToData.id);
+            }
+        },
+        subscribedToUser: {
+            type: new GraphQLList(GraphQLUserType),
+            resolve: async (subscribedToUserData: UserEntity, _, fastify: FastifyInstance) => {
+                await getSubscribedToUser(fastify, subscribedToUserData.subscribedToUserIds);
+            }
+        }
     }),
 });
 

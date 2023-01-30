@@ -32,3 +32,11 @@ export const CreateGraphQLPostInput = new GraphQLInputObjectType({
         userId: { type: new GraphQLNonNull(GraphQLString) },
     }),
 });
+
+export const SubscribeToGraphQLUserInput = new GraphQLInputObjectType({
+    name: "SubscribeToGraphQLUserInput",
+    fields: () => ({
+        id: { type: new GraphQLNonNull(GraphQLString) },
+        userId: { type: new GraphQLNonNull(GraphQLString) },
+    }),
+});

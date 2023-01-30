@@ -1,10 +1,13 @@
 import { FastifyPluginAsyncJsonSchemaToTs } from '@fastify/type-provider-json-schema-to-ts';
-import { graphql, GraphQLList, GraphQLNonNull, GraphQLObjectType, GraphQLSchema } from 'graphql';
+import { graphql, GraphQLList, GraphQLNonNull, GraphQLObjectType, GraphQLSchema, parse, validate } from 'graphql';
 import { graphqlBodySchema } from './schema';
 import { GraphQLMemberTypesType, GraphQLPostType, GraphQLProfileType, GraphQLUserType } from './query-types';
 import { GraphQLID, GraphQLString } from 'graphql/type';
-import { getMemberTypeById, getPostById, getUserById, createProfile, createUser, createPost, getProfileById } from './helpers';
-import { CreateGraphQLProfileInput, CreateGraphQLUserInput, CreateGraphQLPostInput } from './mutation-types';
+import { getMemberTypeById, getPostById, getUserById, createProfile, createUser, createPost, getProfileById, subscribeUser, unsubscribeUser } from './helpers';
+import { CreateGraphQLProfileInput, CreateGraphQLUserInput, CreateGraphQLPostInput, SubscribeToGraphQLUserInput } from './mutation-types';
+import * as depthLimit from "graphql-depth-limit";
+
+const DEPTH_LIMIT = 6;
 
 const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
   fastify
@@ -127,10 +130,40 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
               },
             },
 
+            subscribeToUser: {
+              type: GraphQLUserType,
+              args: {
+                data: { type: SubscribeToGraphQLUserInput }
+              },
+              resolve(_, args) {
+                const { data } = args;
+
+                return subscribeUser(fastify, data.id, data.userId);
+              },
+            },
+
+            unsubscribeFromUser: {
+              type: GraphQLUserType,
+              args: {
+                data: { type: SubscribeToGraphQLUserInput }
+              },
+              resolve(_, args) {
+                const { data } = args;
+
+                return unsubscribeUser(fastify, data.id, data.userId);
+              },
+            },
+
           }),
         })
       }
       );
+
+      const errors = validate(schema, parse(request.body.query!), [depthLimit(DEPTH_LIMIT)]);
+
+      if (errors.length > 0) {
+        return { data: null, errors };
+      }
 
       const result: any = await graphql({
         schema,
