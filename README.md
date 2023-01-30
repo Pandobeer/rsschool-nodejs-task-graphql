@@ -11,7 +11,17 @@ If the properties of the entity are not specified, then return the id of it.
 `subscribedToUser` - these are users who are following the current user.  
    
    * Get gql requests:  
-   2.1. Get users, profiles, posts, memberTypes - 4 operations in one query.  
+   2.1. Get users, profiles, posts, memberTypes - 4 operations in one query. 
+
+   ```
+   query {
+      Users { id }
+      Posts { id }
+      Profiles { id }
+      MemberTypes { id }
+   }
+   ```
+   
    2.2. Get user, profile, post, memberType by id - 4 operations in one query.  
    2.3. Get users with their posts, profiles, memberTypes.  
    2.4. Get user by id with his posts, profile, memberType.  

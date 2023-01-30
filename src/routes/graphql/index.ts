@@ -1,52 +1,10 @@
 import { FastifyPluginAsyncJsonSchemaToTs } from '@fastify/type-provider-json-schema-to-ts';
-import { graphql, GraphQLList, GraphQLObjectType, GraphQLSchema, GraphQLString } from 'graphql';
-import { GraphQLID, GraphQLInt } from 'graphql/type';
+import { graphql, GraphQLList, GraphQLNonNull, GraphQLObjectType, GraphQLSchema } from 'graphql';
 import { graphqlBodySchema } from './schema';
-
-export const GraphQLUserType = new GraphQLObjectType({
-  name: "UserType",
-  fields: () => ({
-    id: { type: GraphQLID },
-    firstName: { type: GraphQLString },
-    lastName: { type: GraphQLString },
-    email: { type: GraphQLString },
-    subscribedToUserIds: { type: new GraphQLList(GraphQLString) },
-  }),
-});
-
-export const GraphQLPostType = new GraphQLObjectType({
-  name: "PostType",
-  fields: () => ({
-    id: { type: GraphQLID },
-    title: { type: GraphQLString },
-    content: { type: GraphQLString },
-    userId: { type: GraphQLString },
-  }),
-});
-
-export const GraphQLProfileType = new GraphQLObjectType({
-  name: "ProfileType",
-  fields: () => ({
-    id: { type: GraphQLID },
-    avatar: { type: GraphQLString },
-    sex: { type: GraphQLString },
-    birthday: { type: GraphQLString },
-    country: { type: GraphQLString },
-    street: { type: GraphQLString },
-    city: { type: GraphQLString },
-    userId: { type: GraphQLString },
-    memberTypeId: { type: GraphQLString },
-  }),
-});
-
-export const GraphQLMemberTypesType = new GraphQLObjectType({
-  name: "MemberType",
-  fields: () => ({
-    id: { type: GraphQLID },
-    discount: { type: GraphQLInt },
-    monthPostsLimit: { type: GraphQLInt },
-  }),
-});
+import { GraphQLMemberTypesType, GraphQLPostType, GraphQLProfileType, GraphQLUserType } from './query-types';
+import { GraphQLID } from 'graphql/type';
+import { getMemberTypeById, getPostById, getUserById, createUserInput } from './helpers';
+import { CreateGraphQLProfileInput, CreateGraphQLUserInput } from './mutation-types';
 
 const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
   fastify
@@ -63,49 +21,121 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
         query: new GraphQLObjectType({
           name: "Query",
           fields: () => ({
-            getUsers: {
+            // getAllTypes: {
+            //   type: new GraphQLList(GraphQLAllType),
+            //   resolve: () => '',
+            // },
+
+            Users: {
               type: new GraphQLList(GraphQLUserType),
               resolve() {
                 return fastify.db.users.findMany();
               },
             },
 
-            getProfiles: {
+            Profiles: {
               type: new GraphQLList(GraphQLProfileType),
               resolve() {
                 return fastify.db.profiles.findMany();
               },
             },
 
-            getPosts: {
+            Posts: {
               type: new GraphQLList(GraphQLPostType),
               resolve() {
                 return fastify.db.posts.findMany();
               },
             },
 
-            getMemberTypes: {
+            MemberTypes: {
               type: new GraphQLList(GraphQLMemberTypesType),
               resolve() {
                 return fastify.db.memberTypes.findMany();
               },
             },
 
+            UserById: {
+              type: new GraphQLList(GraphQLUserType),
+              args: {
+                id: { type: new GraphQLNonNull(GraphQLID) }
+              },
+              resolve(_, { userId }) {
+                return getUserById(fastify, userId);
+              },
+            },
+
+            ProfileById: {
+              type: new GraphQLList(GraphQLProfileType),
+              args: {
+                id: { type: new GraphQLNonNull(GraphQLID) }
+              },
+              resolve(_, { profileId }) {
+                return getUserById(fastify, profileId);
+              },
+            },
+
+            PostById: {
+              type: new GraphQLList(GraphQLPostType),
+              args: {
+                id: { type: new GraphQLNonNull(GraphQLID) }
+              },
+              resolve(_, { postId }) {
+                return getPostById(fastify, postId);
+              },
+            },
+
+            MemberTypeById: {
+              type: new GraphQLList(GraphQLMemberTypesType),
+              args: {
+                id: { type: new GraphQLNonNull(GraphQLID) }
+              },
+              resolve(_, { memberTypeId }) {
+                return getMemberTypeById(fastify, memberTypeId);
+              },
+            },
+
           }),
+
         }),
+        mutation: new GraphQLObjectType({
+          name: "Mutation",
+          fields: () => ({
+            createUser: {
+              type: GraphQLUserType,
+              args: { data: { type: CreateGraphQLUserInput } },
+              resolve(_, args) {
+                const { data } = args;
+
+                return createUserInput(fastify, data);
+              },
+            },
+
+            createProfile: {
+              type: GraphQLProfileType,
+              args: { data: { type: CreateGraphQLProfileInput } },
+              resolve(_, args) {
+                const { data } = args;
+
+                return createUserInput(fastify, data);
+              },
+            },
+
+          }),
+        })
       }
       );
 
-      const result = await graphql({
+      const result: any = await graphql({
         schema,
         source: String(request.body.query),
         contextValue: fastify,
+        variableValues: request.body.variables,
       });
 
       console.log(result);
 
 
-      return reply.send(result);
+      return result;
     });
 };
 
