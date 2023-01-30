@@ -21,18 +21,133 @@ If the properties of the entity are not specified, then return the id of it.
       MemberTypes { id }
    }
    ```
-   
+
    2.2. Get user, profile, post, memberType by id - 4 operations in one query.  
+
+   ```
+   query ($userId: ID!, $postId: ID!, $profileId: ID!, $memberTypeId: String!) {
+         UserById(id: $userId) {
+            id
+         }
+         PostById(id: $postId) {
+            id
+         }
+         ProfileById(id: $profileId) {
+            id
+         }
+         MemberTypeById(id: $memberTypeId) {
+            id
+         }
+      }
+
+      {
+    "userId": <userId>,
+    "postId": <postId>,
+    "profileId": <profileId>,
+    "memberTypeId": "business"
+}
+
+      ```
    2.3. Get users with their posts, profiles, memberTypes.  
    2.4. Get user by id with his posts, profile, memberType.  
    2.5. Get users with their `userSubscribedTo`, profile.  
    2.6. Get user by id with his `subscribedToUser`, posts.  
    2.7. Get users with their `userSubscribedTo`, `subscribedToUser` (additionally for each user in `userSubscribedTo`, `subscribedToUser` add their `userSubscribedTo`, `subscribedToUser`).  
+
    * Create gql requests:   
-   2.8. Create user.  
-   2.9. Create profile.  
-   2.10. Create post.  
+   2.8. Create user. 
+   
+   query:
+   ```
+   mutation ($firstName: String!, $lastName: String!, $email: String!)
+   {
+    createUser(data: {firstName: $firstName, lastName: $lastName, email: $email})
+    {
+      id
+      firstName
+      lastName
+      subscribedToUserIds
+    }
+   }
+   ```
+    variables:
+       ```
+       {
+    "firstName": "Joe",
+    "lastName": "Black",
+    "email": "asd@asd.ru"
+      }
+   ```
+
+   2.9. Create profile. 
+
+QUERY:
+   ```
+mutation ($avatar: String!, $sex: String!, $birthday: Int!, $country: String!, $street: String!, $city: String!, $memberTypeId: String!, $userId: String!){
+    createProfile(
+        data: {
+            avatar: $avatar, 
+            sex: $sex, 
+            birthday: $birthday, 
+            country: $country,
+            street: $street,
+            city: $city,
+            memberTypeId: $memberTypeId,
+            userId: $userId
+            }
+        )
+    {
+        id
+        avatar
+        sex
+        birthday
+        country
+        street
+        city
+        memberTypeId
+        userId
+    }
+}
+```
+variables:
+      ```
+      {
+    "avatar": "./assets/avatar.png",
+    "sex": "male",
+    "birthday": 1983,
+    "country": "Georgia",
+    "street": "Elekcyjna",
+    "city": "Warsaw",
+    "memberTypeId": "business",
+    "userId": <userId>     
+      }
+      ```
+      
+   2.10. Create post. 
+
+QUERY:
+   ```
+   mutation ($title: String!, $content: String!, $userId: String!){
+    createPost(data: {title: $title, content: $content, userId: $userId})
+    {
+      id
+      title
+      content
+      userId
+    }
+   } 
+   ```
+   variables:
+      ```
+      {
+    "title": "ABC",
+    "content": "abc",
+    "userId": <userId>
+}
+      ```
+
    2.11. [InputObjectType](https://graphql.org/graphql-js/type/#graphqlinputobjecttype) for DTOs.  
+   
    * Update gql requests:  
    2.12. Update user.  
    2.13. Update profile.  
