@@ -14,7 +14,7 @@ export const getUserById = async (fastify: FastifyInstance, useriId: string) => 
 };
 
 export const getProfileById = async (fastify: FastifyInstance, profileId: string) => {
-    const profile = await fastify.db.profiles.findOne({ key: "id", equals: profileId });
+    const profile = await fastify.db.profiles.findOne({ key: "userId", equals: profileId });
 
     if (!profile) {
         throw fastify.httpErrors.notFound("Profile does not exist");
@@ -24,18 +24,26 @@ export const getProfileById = async (fastify: FastifyInstance, profileId: string
 };
 
 export const getPostById = async (fastify: FastifyInstance, postId: string) => {
-    const post = await fastify.db.posts.findOne({ key: "id", equals: postId });
+    console.log(postId);
 
-    if (!post) {
+    const posts = await fastify.db.posts.findMany({ key: "userId", equals: postId });
+
+    if (!posts) {
         throw fastify.httpErrors.notFound("Post does not exist");
     }
 
-    return post;
+    return posts;
 };
 
 
-export const getMemberTypeById = async (fastify: FastifyInstance, memberTypeId: string) => {
-    const memberType = await fastify.db.memberTypes.findOne({ key: "id", equals: memberTypeId });
+export const getMemberTypeById = async (fastify: FastifyInstance, userId: string) => {
+    const profile = await fastify.db.profiles.findOne({ key: "userId", equals: userId });
+
+    if (!profile) {
+        throw fastify.httpErrors.notFound("Profile does not exist");
+    }
+
+    const memberType = await fastify.db.memberTypes.findOne({ key: "id", equals: profile.memberTypeId });
 
     if (!memberType) {
         throw fastify.httpErrors.notFound("Member Type does not exist");
@@ -60,15 +68,15 @@ export const createProfile = async (fastify: FastifyInstance, profileToCreate: C
 
     const memberTypeId = profileToCreate.memberTypeId;
 
-    const memberType = await fastify.db.memberTypes.findOne({ key: "id", equals: memberTypeId });
+    const userMemberType = await fastify.db.memberTypes.findOne({ key: "id", equals: memberTypeId });
 
-    if (!memberType) {
+    if (!userMemberType) {
         throw fastify.httpErrors.badRequest("Member Type does not exist");
     }
 
-    const profile = await fastify.db.profiles.findOne({ key: "userId", equals: userId });
+    const userProfile = await fastify.db.profiles.findOne({ key: "userId", equals: userId });
 
-    if (profile) {
+    if (userProfile) {
         throw fastify.httpErrors.badRequest("User profile already exists");
     }
 

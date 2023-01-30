@@ -1,5 +1,8 @@
 import { GraphQLList, GraphQLObjectType, GraphQLString } from 'graphql';
 import { GraphQLID, GraphQLInt } from 'graphql/type';
+import { FastifyInstance } from 'fastify';
+import { UserEntity } from '../../utils/DB/entities/DBUsers';
+import { getMemberTypeById, getPostById, getProfileById } from './helpers';
 
 export const GraphQLUserType = new GraphQLObjectType({
     name: "UserType",
@@ -9,6 +12,18 @@ export const GraphQLUserType = new GraphQLObjectType({
         lastName: { type: GraphQLString },
         email: { type: GraphQLString },
         subscribedToUserIds: { type: new GraphQLList(GraphQLString) },
+        posts: {
+            type: new GraphQLList(GraphQLPostType),
+            resolve: async (userData: UserEntity, _, fastify: FastifyInstance) => getPostById(fastify, userData.id),
+        },
+        profile: {
+            type: GraphQLProfileType,
+            resolve: async (profileData: UserEntity, _, fastify: FastifyInstance) => getProfileById(fastify, profileData.id),
+        },
+        memberType: {
+            type: GraphQLMemberTypesType,
+            resolve: async (memberTypeData: UserEntity, _, fastify: FastifyInstance) => getMemberTypeById(fastify, memberTypeData.id),
+        },
     }),
 });
 

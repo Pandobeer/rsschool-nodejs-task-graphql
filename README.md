@@ -49,6 +49,19 @@ If the properties of the entity are not specified, then return the id of it.
 
       ```
    2.3. Get users with their posts, profiles, memberTypes.  
+      
+      query:
+
+      ```
+   query {
+      Users { 
+         id
+         posts { id }
+         profile { id }
+         memberType { id }
+      }
+   }
+      ```
    2.4. Get user by id with his posts, profile, memberType.  
    2.5. Get users with their `userSubscribedTo`, profile.  
    2.6. Get user by id with his `subscribedToUser`, posts.  
