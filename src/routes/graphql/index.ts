@@ -2,8 +2,8 @@ import { FastifyPluginAsyncJsonSchemaToTs } from '@fastify/type-provider-json-sc
 import { graphql, GraphQLList, GraphQLNonNull, GraphQLObjectType, GraphQLSchema } from 'graphql';
 import { graphqlBodySchema } from './schema';
 import { GraphQLMemberTypesType, GraphQLPostType, GraphQLProfileType, GraphQLUserType } from './query-types';
-import { GraphQLID } from 'graphql/type';
-import { getMemberTypeById, getPostById, getUserById, createProfile, createUser, createPost } from './helpers';
+import { GraphQLID, GraphQLString } from 'graphql/type';
+import { getMemberTypeById, getPostById, getUserById, createProfile, createUser, createPost, getProfileById } from './helpers';
 import { CreateGraphQLProfileInput, CreateGraphQLUserInput, CreateGraphQLPostInput } from './mutation-types';
 
 const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
@@ -21,11 +21,6 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
         query: new GraphQLObjectType({
           name: "Query",
           fields: () => ({
-            // getAllTypes: {
-            //   type: new GraphQLList(GraphQLAllType),
-            //   resolve: () => '',
-            // },
-
             Users: {
               type: new GraphQLList(GraphQLUserType),
               resolve() {
@@ -55,42 +50,44 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
             },
 
             UserById: {
-              type: new GraphQLList(GraphQLUserType),
+              type: GraphQLUserType,
               args: {
                 id: { type: new GraphQLNonNull(GraphQLID) }
               },
-              resolve(_, { userId }) {
-                return getUserById(fastify, userId);
+              resolve(_, { id }) {
+                return getUserById(fastify, id);
               },
             },
 
             ProfileById: {
-              type: new GraphQLList(GraphQLProfileType),
+              type: GraphQLProfileType,
               args: {
                 id: { type: new GraphQLNonNull(GraphQLID) }
               },
-              resolve(_, { profileId }) {
-                return getUserById(fastify, profileId);
+              resolve(_, { id }) {
+                return getProfileById(fastify, id);
               },
             },
 
             PostById: {
-              type: new GraphQLList(GraphQLPostType),
+              type: GraphQLPostType,
               args: {
                 id: { type: new GraphQLNonNull(GraphQLID) }
               },
-              resolve(_, { postId }) {
-                return getPostById(fastify, postId);
+              resolve(_, { id }) {
+                return getPostById(fastify, id);
               },
             },
 
             MemberTypeById: {
-              type: new GraphQLList(GraphQLMemberTypesType),
+              type: GraphQLMemberTypesType,
               args: {
-                id: { type: new GraphQLNonNull(GraphQLID) }
+                id: { type: new GraphQLNonNull(GraphQLString) }
               },
-              resolve(_, { memberTypeId }) {
-                return getMemberTypeById(fastify, memberTypeId);
+              resolve(_, { id }) {
+                console.log(id);
+
+                return getMemberTypeById(fastify, id);
               },
             },
 
@@ -142,8 +139,7 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
         variableValues: request.body.variables,
       });
 
-      console.log(result);
-
+      console.log("result", result);
 
       return result;
     });

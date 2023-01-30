@@ -14,7 +14,7 @@ export const getUserById = async (fastify: FastifyInstance, useriId: string) => 
 };
 
 export const getProfileById = async (fastify: FastifyInstance, profileId: string) => {
-    const profile = await fastify.db.users.findOne({ key: "id", equals: profileId });
+    const profile = await fastify.db.profiles.findOne({ key: "id", equals: profileId });
 
     if (!profile) {
         throw fastify.httpErrors.notFound("Profile does not exist");
@@ -24,7 +24,7 @@ export const getProfileById = async (fastify: FastifyInstance, profileId: string
 };
 
 export const getPostById = async (fastify: FastifyInstance, postId: string) => {
-    const post = await fastify.db.users.findOne({ key: "id", equals: postId });
+    const post = await fastify.db.posts.findOne({ key: "id", equals: postId });
 
     if (!post) {
         throw fastify.httpErrors.notFound("Post does not exist");
@@ -35,7 +35,7 @@ export const getPostById = async (fastify: FastifyInstance, postId: string) => {
 
 
 export const getMemberTypeById = async (fastify: FastifyInstance, memberTypeId: string) => {
-    const memberType = await fastify.db.users.findOne({ key: "id", equals: memberTypeId });
+    const memberType = await fastify.db.memberTypes.findOne({ key: "id", equals: memberTypeId });
 
     if (!memberType) {
         throw fastify.httpErrors.notFound("Member Type does not exist");
